@@ -1,0 +1,84 @@
+{
+  "_commentaire": "Modifie librement cette liste. Lance 'python veille.py --check-feeds' apres chaque changement pour verifier que les flux repondent.",
+
+  "anciennete_max_jours": 10,
+  "max_articles_par_execution": 12,
+  "score_minimum": 2,
+  "archive": true,
+
+  "flux": [
+    { "nom": "CERT-FR / Alertes",        "url": "https://www.cert.ssi.gouv.fr/alerte/feed/" },
+    { "nom": "CERT-FR / Avis",           "url": "https://www.cert.ssi.gouv.fr/avis/feed/" },
+    { "nom": "CERT-FR / Actualites",     "url": "https://www.cert.ssi.gouv.fr/actualite/feed/" },
+    { "nom": "ANSSI / cyber.gouv.fr",    "url": "https://cyber.gouv.fr/actualites/feed" },
+    { "nom": "Le Monde Informatique",    "url": "https://www.lemondeinformatique.fr/flux-rss/thematique/securite/rss.xml" },
+    { "nom": "LeMagIT Securite",         "url": "https://www.lemagit.fr/rss/toutsurlesecurite.xml" },
+    { "nom": "01net",                    "url": "https://www.01net.com/feed/" },
+    { "nom": "Numerama",                 "url": "https://www.numerama.com/feed/" },
+    { "nom": "ZATAZ",                    "url": "https://www.zataz.com/feed/" },
+    { "nom": "Sekoia Blog",              "url": "https://blog.sekoia.io/feed/" },
+    { "nom": "The Hacker News",          "url": "https://feeds.feedburner.com/TheHackersNews" },
+    { "nom": "BleepingComputer",         "url": "https://www.bleepingcomputer.com/feed/" },
+    { "nom": "Malwarebytes Labs",        "url": "https://www.malwarebytes.com/blog/feed/index.xml" },
+    { "nom": "Krebs on Security",        "url": "https://krebsonsecurity.com/feed/" },
+    { "nom": "SecurityWeek",             "url": "https://feeds.feedburner.com/securityweek" },
+
+    { "nom": "Google News / ransomware",  "url": "https://news.google.com/rss/search?q=%22attaque+ransomware%22&hl=fr&gl=FR&ceid=FR:fr" },
+    { "nom": "Google News / rancongiciel","url": "https://news.google.com/rss/search?q=ran%C3%A7ongiciel&hl=fr&gl=FR&ceid=FR:fr" },
+    { "nom": "Google News / LockBit",     "url": "https://news.google.com/rss/search?q=LockBit+OR+%22Cl0p%22+OR+Akira+ransomware&hl=fr&gl=FR&ceid=FR:fr" }
+  ],
+
+  "_commentaire_mots_cles": "Un article doit contenir AU MOINS UN de ces mots pour etre retenu. Le pluriel est gere automatiquement, les accents aussi.",
+  "mots_cles": [
+    "ransomware",
+    "rancongiciel",
+    "rancon",
+    "ranconnage",
+    "raas",
+    "ransomware-as-a-service",
+    "double extorsion",
+    "triple extorsion",
+    "chiffrement malveillant",
+    "lockbit",
+    "blackcat",
+    "alphv",
+    "akira",
+    "cl0p",
+    "clop",
+    "medusa",
+    "rhysida",
+    "qilin",
+    "black basta",
+    "everest",
+    "safepay",
+    "inc ransom",
+    "hive",
+    "conti",
+    "royal ransomware",
+    "play ransomware",
+    "8base",
+    "babuk"
+  ],
+
+  "_commentaire_tags": "Ces mots n'ouvrent pas la porte a eux seuls, ils servent a etiqueter l'article et a augmenter son score (donc sa priorite).",
+  "tags": {
+    "groupe": ["lockbit", "alphv", "blackcat", "akira", "cl0p", "medusa", "rhysida", "qilin", "black basta", "everest", "safepay", "inc ransom", "hive", "conti", "babuk", "scattered spider", "shinyhunters"],
+    "technique": ["double extorsion", "triple extorsion", "exfiltration", "phishing", "hameconnage", "zero-day", "vulnerabilite", "faille critique", "rdp", "vpn", "mfa", "intelligence artificielle", "supply chain", "chaine d'approvisionnement", "wiper", "acces initial", "credential"],
+    "cible": ["hopital", "mairie", "collectivite", "pme", "universite", "lycee", "aeroport", "operateur", "sous-traitant"],
+    "reponse": ["anssi", "cert-fr", "cnil", "europol", "demantelement", "arrestation", "sanction", "dechiffrement", "decrypteur", "sauvegarde", "correctif"]
+  },
+
+  "_commentaire_exclusions": "Un article contenant un de ces mots est ecarte, meme s'il matche un mot-cle. Utile pour filtrer les pages promo des sites d'actu.",
+  "exclusions": [
+    "bon plan",
+    "code promo",
+    "black friday",
+    "french days",
+    "meilleur antivirus",
+    "meilleur vpn",
+    "notre selection",
+    "en promotion",
+    "article sponsorise",
+    "publi-redactionnel"
+  ]
+}
