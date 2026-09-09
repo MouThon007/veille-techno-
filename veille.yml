@@ -1,0 +1,42 @@
+name: Veille technologique
+
+on:
+  schedule:
+    # Attention : GitHub utilise l'heure UTC.
+    # Paris = UTC+2 en ete, UTC+1 en hiver.
+    - cron: "0 7 * * 1-5"    # veille quotidienne, 9h00 Paris (ete) / 8h00 (hiver)
+    - cron: "30 15 * * 5"    # recap hebdo du vendredi, 17h30 Paris (ete)
+  workflow_dispatch:          # permet aussi de lancer a la main depuis l'onglet Actions
+
+permissions:
+  contents: write             # necessaire pour sauvegarder state.json entre 2 executions
+
+jobs:
+  veille:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Lancer la veille
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [ "${{ github.event.schedule }}" = "30 15 * * 5" ]; then
+            python veille.py --digest --max 25
+          else
+            python veille.py
+          fi
+
+      - name: Memoriser les articles deja publies
+        run: |
+          git config user.name "veille-bot"
+          git config user.email "veille-bot@users.noreply.github.com"
+          git add state.json archives/ 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "veille: mise a jour automatique"
+          git push
