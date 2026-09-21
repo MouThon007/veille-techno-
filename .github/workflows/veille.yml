@@ -2,14 +2,12 @@ name: Veille technologique
 
 on:
   schedule:
-    # Attention : GitHub utilise l'heure UTC.
-    # Paris = UTC+2 en ete, UTC+1 en hiver.
-    - cron: "0 7 * * 1-5"    # veille quotidienne, 9h00 Paris (ete) / 8h00 (hiver)
-    - cron: "30 15 * * 5"    # recap hebdo du vendredi, 17h30 Paris (ete)
-  workflow_dispatch:          # permet aussi de lancer a la main depuis l'onglet Actions
+    - cron: "0 7 * * 1-5"
+    - cron: "30 15 * * 5"
+  workflow_dispatch:
 
 permissions:
-  contents: write             # necessaire pour sauvegarder state.json entre 2 executions
+  contents: write
 
 jobs:
   veille:
