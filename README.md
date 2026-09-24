@@ -178,6 +178,22 @@ Après chaque modification, teste avec `python veille.py --dry-run`.
 
 ---
 
+## 6 bis. Fiches de curation (second salon Discord)
+
+Si `DISCORD_FICHES_WEBHOOK_URL` est defini, le bot publie **une fiche par article**
+dans un autre salon, au format du modele de cours (Titre, Source, Date, Resume,
+Pourquoi cet article ?, Qualite de la source, Ce que j'ai appris).
+
+Pre-rempli automatiquement : titre, source, date, auteur (si le flux l'indique),
+actualite, pertinence (score et mots detectes) et un premier avis sur la fiabilite
+et l'objectivite de la source (`types_source` dans `config.json`).
+**A rediger toi-meme** : le resume, le « pourquoi » et « ce que j'ai appris ».
+
+Mise en place : cree un salon, un webhook, puis ajoute le secret GitHub
+`DISCORD_FICHES_WEBHOOK_URL` (et la ligne dans ton `.env` en local).
+
+---
+
 ## 7. Archives pour ton dossier
 
 Chaque exécution écrit un fichier `archives/AAAA-MM-JJ.md` contenant les titres,

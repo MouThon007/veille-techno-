@@ -130,6 +130,18 @@ def extract_link(entry):
     return fallback or child_text(entry, "guid", "id")
 
 
+def extract_author(entry):
+    """Auteur d'un article (RSS: dc:creator/author, Atom: author/name)."""
+    for child in entry:
+        if local_name(child.tag) in ("creator", "author"):
+            if child.text and child.text.strip():
+                return strip_html(child.text)
+            for sub in child:
+                if local_name(sub.tag) == "name" and (sub.text or "").strip():
+                    return sub.text.strip()
+    return ""
+
+
 def parse_date(entry):
     raw = child_text(entry, "pubdate", "published", "updated", "date",
                      "created")
@@ -186,6 +198,7 @@ def parse_feed(raw_bytes, source):
             "lien": link,
             "resume": summary,
             "date": parse_date(entry),
+            "auteur": extract_author(entry),
             "source": source,
         })
     return articles
@@ -353,6 +366,80 @@ def envoyer_telegram(token, chat_id, articles, digest, titre_digest):
         )
         send(texte, preview=True)
     return len(articles)
+
+
+def fiche_embed(art, types_source):
+    """Fiche de curation pre-remplie (modele du cours). Le resume, le
+    'pourquoi' et 'ce que j'ai appris' restent a rediger soi-meme."""
+    info = types_source.get(art["source"], {})
+    if art["date"]:
+        age = (datetime.now(timezone.utc) - art["date"]).days
+        actualite = (f"Publie il y a {age} jour(s)" if age > 0
+                     else "Publie aujourd'hui")
+    else:
+        actualite = "Date inconnue : a verifier sur la page"
+    pertinence = f"Niveau {niveau(art['score'])} (score {art['score']})"
+    if art["tags"]:
+        pertinence += " - mots detectes : " + ", ".join(art["tags"][:6])
+    extrait = (truncate(art["resume"], 500)
+               or "(pas d'extrait fourni par le flux)")
+    piste = ("il traite de " + ", ".join(art["tags"][:3]) + "."
+             if art["tags"] else "en quoi il repond a ton sujet ?")
+
+    def champ(nom, valeur, inline=False):
+        return {"name": nom, "value": truncate(valeur, 1000) or "-",
+                "inline": inline}
+
+    return {
+        "title": truncate(f"Fiche - {art['titre']}", 250),
+        "url": art["lien"],
+        "color": DISCORD_COLORS[niveau(art["score"])],
+        "fields": [
+            champ("Titre", art["titre"]),
+            champ("Source", art["source"], True),
+            champ("Date", art["date_txt"], True),
+            champ("Resume (une dizaine de lignes max)",
+                  "A rediger avec tes propres mots.\n"
+                  f"Extrait pour t'aider : {extrait}"),
+            champ("Pourquoi cet article ?", "A completer. Piste : " + piste),
+            champ("Qualite de la source", "\u200b"),
+            champ("- Fiabilite", info.get("fiabilite", "A verifier"), True),
+            champ("- Auteur", art.get("auteur") or "Non indique : a verifier",
+                  True),
+            champ("- Actualite", actualite, True),
+            champ("- Objectivite", info.get("objectivite", "A verifier"), True),
+            champ("- Pertinence", pertinence, True),
+            champ("Ce que j'ai appris",
+                  "A rediger (phrases simples, sans copier-coller)."),
+        ],
+        "footer": {"text": "Modele de curation - a completer"},
+    }
+
+
+def taille_embed(embed):
+    """Nombre de caracteres compte par Discord (limite : 6000 par message)."""
+    total = len(embed.get("title", "")) + len(embed.get("footer", {}).get("text", ""))
+    for champ in embed.get("fields", []):
+        total += len(champ["name"]) + len(champ["value"])
+    return total
+
+
+def envoyer_fiches(webhook, articles, types_source):
+    lots, lot, taille = [], [], 0
+    for art in articles:
+        embed = fiche_embed(art, types_source)
+        t = taille_embed(embed)
+        if lot and (taille + t > 5500 or len(lot) >= 10):
+            lots.append(lot)
+            lot, taille = [], 0
+        lot.append(embed)
+        taille += t
+    if lot:
+        lots.append(lot)
+    for embeds in lots:
+        post_json(webhook, {"embeds": embeds})
+        time.sleep(1.2)
+    return len(lots)
 
 
 def ecrire_archive(dossier, articles):
@@ -574,7 +661,20 @@ def main():
         except Exception as exc:
             log(f"Telegram ERREUR : {exc}")
 
-    if not webhook and not (token and chat_id):
+    fiches = os.environ.get("DISCORD_FICHES_WEBHOOK_URL", "").strip()
+    if fiches:
+        try:
+            n = envoyer_fiches(fiches, selection,
+                               config.get("types_source", {}))
+            log(f"Fiches de curation : {n} message(s) envoye(s).")
+            publie = True
+        except urllib.error.HTTPError as exc:
+            log(f"Fiches ERREUR HTTP {exc.code} : "
+                f"{exc.read().decode('utf-8', 'replace')[:300]}")
+        except Exception as exc:
+            log(f"Fiches ERREUR : {exc}")
+
+    if not webhook and not fiches and not (token and chat_id):
         log("Aucune destination configuree. Renseigne DISCORD_WEBHOOK_URL ou "
             "TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID dans le fichier .env "
             "(ou utilise --dry-run).")

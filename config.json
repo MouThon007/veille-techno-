@@ -34,6 +34,34 @@
     { "nom": "Google News / LockBit",     "url": "https://news.google.com/rss/search?q=LockBit+OR+%22Cl0p%22+OR+Akira+ransomware&hl=fr&gl=FR&ceid=FR:fr" }
   ],
 
+  "_commentaire_types_source": "Sert a pre-remplir la fiche de curation (fiabilite / objectivite). A affiner selon ton jugement.",
+  "types_source": {
+    "CERT-FR / Alertes": {"fiabilite": "Tres elevee : organisme officiel (ANSSI)", "objectivite": "Factuelle, sans but commercial"},
+    "CERT-FR / Avis": {"fiabilite": "Tres elevee : organisme officiel (ANSSI)", "objectivite": "Factuelle, sans but commercial"},
+    "CERT-FR / Actualites": {"fiabilite": "Tres elevee : organisme officiel (ANSSI)", "objectivite": "Factuelle, sans but commercial"},
+    "ANSSI / cyber.gouv.fr": {"fiabilite": "Tres elevee : agence nationale de l'Etat", "objectivite": "Institutionnelle, sans but commercial"},
+    "CNIL": {"fiabilite": "Tres elevee : autorite administrative", "objectivite": "Institutionnelle, sans but commercial"},
+    "Cybermalveillance.gouv.fr": {"fiabilite": "Elevee : dispositif public d'assistance", "objectivite": "Pedagogique, sans but commercial"},
+    "Le Monde Informatique": {"fiabilite": "Elevee : presse informatique professionnelle", "objectivite": "Journalistique, financee par la publicite"},
+    "LeMagIT Securite": {"fiabilite": "Elevee : presse IT professionnelle (via Google Actualites)", "objectivite": "Journalistique"},
+    "ZDNet France / Cyber": {"fiabilite": "Elevee : media tech etabli", "objectivite": "Journalistique, financee par la publicite"},
+    "01net": {"fiabilite": "Moyenne a elevee : media grand public tech", "objectivite": "Journalistique, contenus parfois commerciaux"},
+    "Numerama": {"fiabilite": "Moyenne a elevee : media numerique grand public", "objectivite": "Journalistique, ton parfois engage"},
+    "ZATAZ": {"fiabilite": "Moyenne : media specialise, sources parfois difficiles a verifier", "objectivite": "Journalistique"},
+    "Sekoia Blog": {"fiabilite": "Elevee : analyses techniques d'un editeur de securite", "objectivite": "Expert, mais interet commercial"},
+    "Kaspersky Blog": {"fiabilite": "Elevee sur la technique", "objectivite": "Editeur de securite : interet commercial"},
+    "Securelist (Kaspersky)": {"fiabilite": "Elevee : recherche de menaces", "objectivite": "Editeur de securite : interet commercial"},
+    "Avast Blog": {"fiabilite": "Moyenne a elevee", "objectivite": "Editeur de securite : interet commercial"},
+    "Malwarebytes Labs": {"fiabilite": "Elevee : recherche de menaces", "objectivite": "Editeur de securite : interet commercial"},
+    "The Hacker News": {"fiabilite": "Moyenne a elevee : media specialise anglophone", "objectivite": "Journalistique, titres parfois sensationnalistes"},
+    "BleepingComputer": {"fiabilite": "Elevee : reference sur les ransomwares", "objectivite": "Journalistique, factuelle"},
+    "Krebs on Security": {"fiabilite": "Tres elevee : journaliste d'investigation reconnu", "objectivite": "Journalistique independante"},
+    "SecurityWeek": {"fiabilite": "Elevee : presse securite professionnelle", "objectivite": "Journalistique"},
+    "Google News / ransomware": {"fiabilite": "A verifier : agregateur, voir le media d'origine en fin de titre", "objectivite": "Depend du media d'origine"},
+    "Google News / rancongiciel": {"fiabilite": "A verifier : agregateur, voir le media d'origine en fin de titre", "objectivite": "Depend du media d'origine"},
+    "Google News / LockBit": {"fiabilite": "A verifier : agregateur, voir le media d'origine en fin de titre", "objectivite": "Depend du media d'origine"}
+  },
+
   "_commentaire_mots_cles": "Un article doit contenir AU MOINS UN de ces mots pour etre retenu. Le pluriel est gere automatiquement, les accents aussi.",
   "mots_cles": [
     "ransomware",
