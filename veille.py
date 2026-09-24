@@ -546,6 +546,10 @@ def main():
     parser.add_argument("--telegram-chatid", action="store_true",
                         help="affiche le chat_id de ton salon Telegram")
     parser.add_argument("--no-archive", action="store_true")
+    parser.add_argument("--rejouer", action="store_true",
+                        help="ignore la memoire des articles deja vus (et ne la modifie pas)")
+    parser.add_argument("--fiches-seulement", action="store_true",
+                        help="publie uniquement dans le salon des fiches de curation")
     args = parser.parse_args()
 
     load_dotenv(os.path.join(BASE_DIR, ".env"))
@@ -590,7 +594,8 @@ def main():
     retenus, deja_vus_run = [], set()
     for art in tous:
         aid, tid = article_id(art), title_id(art)
-        if aid in vus or tid in vus or aid in deja_vus_run or tid in deja_vus_run:
+        deja_connu = (aid in vus or tid in vus) and not args.rejouer
+        if deja_connu or aid in deja_vus_run or tid in deja_vus_run:
             continue
         if art["date"] and art["date"] < limite_date:
             continue
@@ -640,6 +645,8 @@ def main():
     token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
     chat_id = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
     publie = False
+    if args.fiches_seulement:
+        webhook, token, chat_id = "", "", ""
 
     if webhook:
         try:
@@ -680,11 +687,11 @@ def main():
             "(ou utilise --dry-run).")
         return 1
 
-    if not args.no_archive and config.get("archive", True):
+    if not args.no_archive and not args.rejouer and config.get("archive", True):
         chemin = ecrire_archive(os.path.join(BASE_DIR, "archives"), selection)
         log(f"Archive Markdown : {chemin}")
 
-    if publie:
+    if publie and not args.rejouer:
         maintenant = datetime.now(timezone.utc).isoformat()
         for art in selection:
             for ident in art["_ids"]:
