@@ -9,6 +9,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: veille
+  cancel-in-progress: false
+
 jobs:
   veille:
     runs-on: ubuntu-latest
@@ -37,4 +41,8 @@ jobs:
           git config user.email "veille-bot@users.noreply.github.com"
           git add state.json archives/ 2>/dev/null || true
           git diff --staged --quiet || git commit -m "veille: mise a jour automatique"
-          git push
+          for i in 1 2 3; do
+            git pull --rebase && git push && exit 0
+            sleep 5
+          done
+          exit 1
