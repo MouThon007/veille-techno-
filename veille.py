@@ -368,6 +368,23 @@ def envoyer_telegram(token, chat_id, articles, digest, titre_digest):
     return len(articles)
 
 
+def envoyer_rien_de_neuf(webhook, token, chat_id, texte):
+    """Message court pour signaler que le bot est bien passe."""
+    if webhook:
+        try:
+            post_json(webhook, {"content": texte})
+            log("Discord : message 'rien de neuf' envoye.")
+        except Exception as exc:
+            log(f"Discord ERREUR : {exc}")
+    if token and chat_id:
+        try:
+            post_json(f"https://api.telegram.org/bot{token}/sendMessage",
+                      {"chat_id": chat_id, "text": texte})
+            log("Telegram : message 'rien de neuf' envoye.")
+        except Exception as exc:
+            log(f"Telegram ERREUR : {exc}")
+
+
 def fiche_embed(art, types_source):
     """Fiche de curation pre-remplie (modele du cours). Le resume, le
     'pourquoi' et 'ce que j'ai appris' restent a rediger soi-meme."""
@@ -572,7 +589,9 @@ def main():
              for cat, kws in config.get("tags", {}).items()}
     exclusions = [build_pattern(kw) for kw in config.get("exclusions", [])]
 
-    jours = args.jours if args.jours is not None else config.get("anciennete_max_jours", 10)
+    # Le recap hebdo reprend toute la semaine, meme les articles deja envoyes
+    jours_defaut = 7 if args.digest else config.get("anciennete_max_jours", 10)
+    jours = args.jours if args.jours is not None else jours_defaut
     plafond = args.max if args.max is not None else config.get("max_articles_par_execution", 12)
     limite_date = datetime.now(timezone.utc) - timedelta(days=jours)
 
@@ -594,7 +613,8 @@ def main():
     retenus, deja_vus_run = [], set()
     for art in tous:
         aid, tid = article_id(art), title_id(art)
-        deja_connu = (aid in vus or tid in vus) and not args.rejouer
+        deja_connu = ((aid in vus or tid in vus)
+                      and not (args.rejouer or args.digest))
         if deja_connu or aid in deja_vus_run or tid in deja_vus_run:
             continue
         if art["date"] and art["date"] < limite_date:
@@ -624,6 +644,15 @@ def main():
     selection = retenus[:plafond]
     if not selection:
         log("Rien de neuf a publier.")
+        if not args.dry_run and not args.rejouer:
+            texte = (f"Veille ransomware — {datetime.now().strftime('%d/%m/%Y')} : "
+                     + ("aucun article pertinent cette semaine."
+                        if args.digest else "rien de neuf aujourd'hui."))
+            envoyer_rien_de_neuf(
+                os.environ.get("DISCORD_WEBHOOK_URL", "").strip(),
+                os.environ.get("TELEGRAM_BOT_TOKEN", "").strip(),
+                os.environ.get("TELEGRAM_CHAT_ID", "").strip(),
+                texte)
         sauver_etat(args.state, etat)
         return 0
 
@@ -669,6 +698,8 @@ def main():
             log(f"Telegram ERREUR : {exc}")
 
     fiches = os.environ.get("DISCORD_FICHES_WEBHOOK_URL", "").strip()
+    if args.digest:
+        fiches = ""
     if fiches:
         try:
             n = envoyer_fiches(fiches, selection,
@@ -687,11 +718,12 @@ def main():
             "(ou utilise --dry-run).")
         return 1
 
-    if not args.no_archive and not args.rejouer and config.get("archive", True):
+    if (not args.no_archive and not args.rejouer and not args.digest
+            and config.get("archive", True)):
         chemin = ecrire_archive(os.path.join(BASE_DIR, "archives"), selection)
         log(f"Archive Markdown : {chemin}")
 
-    if publie and not args.rejouer:
+    if publie and not args.rejouer and not args.digest:
         maintenant = datetime.now(timezone.utc).isoformat()
         for art in selection:
             for ident in art["_ids"]:
